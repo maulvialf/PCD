@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 from pprint import pprint
 from sys import *
+import matplotlib.pyplot as plt
 
 # bit.ly/LKP3-PCD
 # Ahmad Maulvi Alfansuri
 # G64160081
 
-##### LKP2
+##### LKP5
 def calculate(b, g, r):
 	grey = r * 0.299 + g * 0.587 + b * 0.114
 	return grey
@@ -56,7 +57,7 @@ def contrast_formula(pixel, maks, mini):
 
 def contrast_stretching(image):
 	(row, col, chan) = image.shape
-	new_image = image
+	new_image = image.copy()
 	maks = get_max(image)
 	mini = get_min(image)
 	# print(maks, mini)
@@ -69,17 +70,15 @@ def contrast_stretching(image):
 def extract_intensity(image, include_zero = 0):
 	(row, col, chan) = image.shape
 	color_pixel = [0 for _ in range(256)]
+	selected = {}
 	for y in range(row):
 		for x in range(col):
 			color = image[y, x, 0]
 			color_pixel[color] += 1
-	selected = {
 
-	}
 	for idx, isi in enumerate(color_pixel):
 		if(isi != 0 or include_zero == 1):
 			selected[idx] = isi
-
 	return selected
 
 def scaling(data, y_size, y_maks, y_margin=1):
@@ -102,10 +101,18 @@ def get_min_dict(image):
 			mini = image[i]
 	return mini
 
+def cummulative_distributive_function(image_intensity):
+	cdf_table = image_intensity.copy()
+	old_key = -1
+	for key in image_intensity:
+		if(old_key != -1):
+			cdf_table[key] += cdf_table[old_key] 
+		old_key = key		
+	return cdf_table
+
 def equalize(image):
 	image_intensity = extract_intensity(image)
 	cdf_table 	= cummulative_distributive_function(image_intensity)
-	# print cdf_table
 	cdf_min 	= get_min_dict(cdf_table)
 	(row, col, chan) = image.shape
 	# Greyscale
@@ -116,12 +123,13 @@ def equalize(image):
 			v = image[y, x, 0]
 			cdf_v = cdf_table[v]
 			dividen = 1.0 * (row * col) - cdf_min
-			h_v = int( L*(cdf_v - cdf_min)/dividen  )
+			h_v = int(round( L*(cdf_v - cdf_min)/dividen  ))
 			# print (cdf_v - cdf_min),
 			new_image.itemset((y,x,0), h_v)
 	
 	return new_image
 
+# Sebelumnya buat pake manual. Ternyata disuruhnya pake matplot lib. Mau dihapus sayang cuman
 def drawHistogram(image, xScale, yScale,title="Contoh",cummulative=0,include_zero=0):
 	image_intensity = extract_intensity(image, include_zero)
 	if(cummulative == 1):
@@ -138,17 +146,25 @@ def drawHistogram(image, xScale, yScale,title="Contoh",cummulative=0,include_zer
 			image_hist.itemset((ySize-y-1, x, 0), 255)
 	cv2.imshow(title, image_hist)
 
-def cummulative_distributive_function(image_intensity):
-	cdf_table = image_intensity.copy()
-	old_key = -1
-	for key in image_intensity:
-		if(old_key != -1):
-			cdf_table[key] += cdf_table[old_key] 
+def drawHistogramWithMathplotlib(image, title, cummulative=0, method = 0):
+	# kodingan awal
+	if(method == 0):
+		image_pixel = image.ravel()
+		plt.hist(image_pixel, 256, cumulative=cummulative, facecolor = 'blue')
+		plt.xlabel('Pixel')
+		plt.ylabel('Jumlah pixel')
+		plt.title(title)
+		plt.show()
+
+	# kodingan dari abangnya
+	elif(method == 1):
+		image_intensity = extract_intensity(image)
+		id_n = [i for i in range(256)]
+		image_intensity = cummulative_distributive_function(image_intensity)
+		print image_intensity
+		# plt.bar(id_n, freq)
 		
-		old_key = key		
-	# print "image awal ",(image_intensity)
-	# print "cummulative ",(cdf_table)
-	return cdf_table
+	return 0
 
 # Environtment variable
 AUTO = 1
@@ -163,18 +179,24 @@ image_equalize 					= equalize(image_greyscale)
 
 # Normal Histogram
 drawHistogram(image_greyscale, 1,1,"Normal")
+drawHistogramWithMathplotlib(image_greyscale, "Normal")
 
 # Image with contrast stretching
 drawHistogram(image_with_contrast_stretching, 1,1,"Contrast Stretching")
+drawHistogramWithMathplotlib(image_with_contrast_stretching, "Contrast Stretching")
 
 # Image with equalize
 drawHistogram(image_equalize, 1,1,"Equalize")
+drawHistogramWithMathplotlib(image_equalize, "Equalize")
 
 # Cummulative
-drawHistogram(image, 1,1, "cummulative", cummulative=1, include_zero=1)
+drawHistogram(image_greyscale, 1,1, "cummulative", cummulative=1, include_zero=1)
 drawHistogram(image_equalize, 1,1, "cummulative equalize", cummulative=1, include_zero=1)
 
+drawHistogramWithMathplotlib(image_greyscale, "cummulative", cummulative=1)
+drawHistogramWithMathplotlib(image_equalize, "cummulative equalize", cummulative=1)
 
+extract_intensity(image_greyscale)
 # drawHistogram(, 1,1,"Contrast Stretching")
 cv2.imshow("original", image)
 cv2.imshow("contrast_up", image_with_contrast_stretching)

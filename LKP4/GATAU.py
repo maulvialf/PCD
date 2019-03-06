@@ -47,8 +47,10 @@ def kernel_summation(box, kernel):
 			hasil += box[y,x] * kernel[y,x]
 	return hasil			
 
-def konvolusi(image, kernel, dim=3, normal=1):	
+def konvolusi(image, kernel):	
 	(row, col, chan) = image.shape	
+	(mrow, mcol) = kernel.shape
+	dim = mrow	
 	new_image = image.copy()
 	for y in range(0, row):
 		for x in range(0, col):
@@ -61,7 +63,10 @@ def konvolusi(image, kernel, dim=3, normal=1):
 			# Memasukkan array tetangga dengan menggunakan looping
 			# Masih berfungsi jika matriks yang diberikan adalah 3x3
 			box = get_adjescent(image,y,x,dim)
-			new_pixel = kernel_summation(box, kernel)
+			print box
+			# new_pixel = kernel_summation(box, kernel)
+			new_pixel = get_median(box)
+			print new_pixel
 			if(new_pixel >= 255):
 				new_pixel = 255
 			new_image.itemset((y, x, 0), new_pixel)
@@ -91,63 +96,24 @@ def get_adjescent(image,y,x,n):
 		y_idx += 1
 	return box
 
+def get_median(array_of_pixel):
+	# implementation of median
+	# Sorting list pixel
+	array_of_pixel.sort()
+	panjang = len(array_of_pixel)
+	# ambil titik tengah (median)
+	mid = panjang / 2
+	new_pixel =  array_of_pixel[mid]
+	# kembalikan nilai pixel baru
+	return new_pixel
+
 # Baca image yang ingin diblur. Dalam tugas adalah LennaInput.jpg
 image = load_image()
 # Ubah menjadi greyscale
 image_greyscale = greyscaling_image(image)
 # Fungsi utama untuk melakukan medianBlur
-kernel = np.ones((3,3), np.float32) / 9
+kernel = np.ones((	3,3), np.float32) / 9
 image_blur = konvolusi(image_greyscale, kernel)
 # tampilkan gambar yang telah diblur
 cv2.imshow("konvolusi", image_blur)
 cv2.waitKey(0)
-
-
-# # class implementation
-# class Image:
-# 	def __init__(self, file_name):
-# 		self.image = cv2.imread(file_name)
-# 		self.image_greyscale = 	cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
-
-
-# class Konvolusi:
-# 	def __init__(self, image, ):
-
-
-# 	def kernel_summation(box, kernel):   
-# 		(row, col) = kernel.shape	
-# 		hasil = 0
-# 		for y in range(0, row):
-# 			for x in range(0, col):
-# 				hasil += box[y,x] * kernel[y,x]
-# 		return hasil			
-
-# 	def get_adjescent(image,y,x,n):
-# 		# Inisialisasi list
-# 		box = np.zeros((3,3), np.float32)
-# 		# Cari batas untuk seleksi matriks tetangga
-# 		bound = n // 2 
-# 		# nested loop untuk seleksi matriks tetangga
-# 		y_idx = 0
-# 		for i in range(-bound,bound+1,1):
-# 			x_idx = 0
-# 			for j in range(-bound,bound+1,1):
-# 				# Masukin pixel tetangga dan pixel sendiri kedalam list
-# 				box[y_idx,x_idx] = image[y+i,x+j]			
-# 				"""
-# 				Yang dimasukkan kedalam matriks adalah pixel image
-# 				image[y-n,  x-n] . . image[y-n  , x+n] 
-# 				image[y-n+1,x-n] . . image[y-n+1, x+n] 
-# 					.
-# 				image[y+n,  x-1] . . image[y+n  , x+n] 
-# 				"""
-# 				x_idx += 1
-# 			y_idx += 1
-# 		return box
-
-
-
-
-
-# image = Image("LennaInput.jpg")
-# image = Konvolusi(image.greyscale, kernel)

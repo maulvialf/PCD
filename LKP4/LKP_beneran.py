@@ -47,8 +47,10 @@ def kernel_summation(box, kernel):
 			hasil += box[y,x] * kernel[y,x]
 	return hasil			
 
-def konvolusi(image, kernel, dim=3, normal=1):	
-	(row, col, chan) = image.shape	
+def konvolusi(image, kernel):	
+	(row, col, chan) = image.shape
+	(mrow, mcol) = kernel.shape	
+	
 	new_image = image.copy()
 	for y in range(0, row):
 		for x in range(0, col):

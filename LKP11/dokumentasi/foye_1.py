@@ -1,9 +1,10 @@
+# import library yang dibutuhkan
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
 # size filter
-size = 50
+size = 30
 # baca image
 img = cv2.imread('tomat-single.jpg',0)
 # ubah image dengan spasial domain menjadi frequency domain
@@ -40,6 +41,7 @@ f_ishift = np.fft.ifftshift(fshift)
 img_back = np.fft.ifft2(f_ishift)
 # jadikan domain frequency menjadi spatial domain kembali
 img_back = np.abs(img_back)
+
 # tampilkan hasil gambar.
 # tampilkan image awal
 plt.subplot(131),plt.imshow(img, cmap = 'gray')

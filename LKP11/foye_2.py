@@ -11,14 +11,18 @@ size = 30
 
 # change image to discrete fourier transform
 dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
-# shift hasil dft
+# shift hasil shifting
 dft_shift = np.fft.fftshift(dft)
 print dft, dft_shift
 
+# perhitungan spectrum
 magnitude_spectrum = 20*np.log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
 
+# draw image awal
 plt.subplot(121),plt.imshow(img, cmap = 'gray')
+# labelling
 plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+# draw magnitude spectrum
 plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
 plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
 plt.show()
